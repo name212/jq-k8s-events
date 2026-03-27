@@ -41,3 +41,8 @@ kubectl get events -o json | jq -r 'import "k8sevents" as e; . e::filter_normal 
 ---
 
 ```
+
+## Acknowledgment
+
+[fearphage](https://github.com/fearphage/jq-duration) for provide
+def for converting durations.
