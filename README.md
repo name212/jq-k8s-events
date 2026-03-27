@@ -1,6 +1,11 @@
 # jq-k8s-events
 JQ defs for sort, filter and pretty print k8s events.
 
+## include
+
+Save `k8sevents.jq` file to directory, for example `~/lib-jq/k8sevents.jq`
+and pass next arguments `-L ~/lib-jq/` to `jq`.
+
 ## Examples
 
 ```bash
