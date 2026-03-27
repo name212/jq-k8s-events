@@ -1,0 +1,28 @@
+{
+    "name": "k8sevents",
+    "version": "1.0.1",
+    "description": "Sort and pretty print kubernetes events",
+    "homepage": "https://github.com/name212/jq-k8s-events",
+    "bugs": "https://github.com/name212/jq-k8s-events/issues",
+    "author": {
+        "name": "Nikolay Mitrofanov",
+        "url": "https://github.com/name212"
+    },
+    "main": "./k8sevents.jq",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/name212/jq-k8s-events.git"
+    },
+    "dependencies": {},
+    "engines": {
+        "jq": "^1.7.0"
+    },
+    "licenses": [{
+        "type": "MIT",
+        "url": "http://opensource.org/licenses/MIT"
+    }],
+    "keywords": [
+        "kubernetes",
+        "events"
+    ]
+}
