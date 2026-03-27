@@ -1,0 +1,67 @@
+# duration defs got from https://github.com/fearphage/jq-duration
+
+def duration($limit; $separator; $default):
+  if type != "number" then
+    $default
+  else
+    . as $value
+    | [[31536000, "y"], [86400, "d"], [3600, "h"], [60, "m"], [1, "s"]]
+    | [label $out | foreach .[] as $item (
+        [$value, 1];
+        if $limit > 0 and .[1] > $limit then
+          break $out
+        elif .[0] >= $item[0] then
+          [.[0] % $item[0], .[1] + 1] + [(.[0] / $item[0] | floor | tostring) + $item[1]]
+        else
+          .[0:2]
+        end;
+        if length > 2 then
+          .[2]
+        else
+          empty
+        end)
+      ]
+    | if length > 0 then join($separator) else "0s" end
+  end;
+
+def duration($limit; $separator): duration($limit; $separator; "-");
+def duration($limit): duration($limit; " "; "-");
+def duration: duration(0; " "; "-");
+
+def event_happend_count:
+  if .count != null then 
+    .count | tostring
+  elif .series.count != null then
+    .series.count | tostring
+  else
+    "unknown"
+  end;
+
+def event_to_msg_array:
+    [
+        "Type: \(.type)",
+        "Count: \(. | event_happend_count)",
+        "Time: \(.lastTime | .[0:19] +"Z" | fromdateiso8601 as $created | now - $created | floor | duration )",
+        "Reason: \(.reason)",
+        "Object: \(.involvedObject.kind)/\(.involvedObject.name)",
+        "Message: \(.message)"
+    ] | join("\n  ") | "  " + .;
+
+def out_sorted:
+  .items | 
+    map(. + (if .lastTimestamp == null then {"lastTime": .eventTime} else {"lastTime": .lastTimestamp} end)) |
+    sort_by(.lastTime) |
+    map(event_to_msg_array) |
+    join("\n---\n");
+
+def filter_by_type($tp):
+  .items | map(select(.type == $tp)) | {"items": .};
+
+def filter_warn:
+  . | filter_by_type("Warning");
+
+def filter_normal:
+  . | filter_by_type("Normal");
+
+def filter_by_obj_name($name):
+  .items | map(select(.involvedObject.name | test($name))) | {"items": .};
