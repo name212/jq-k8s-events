@@ -1,4 +1,8 @@
+# Copyright 2026
+# license that can be found in the LICENSE file.
+
 # duration defs got from https://github.com/fearphage/jq-duration
+# with MIT license
 
 def duration($limit; $separator; $default):
   if type != "number" then

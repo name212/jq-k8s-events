@@ -10,16 +10,16 @@ and pass next arguments `-L ~/lib-jq/` to `jq`.
 
 ```bash
 # Only sort
-kubectl get events -o json | jq -r 'import "k8sevents" as e; . | e::out_sorted'
+kubectl get events -o json | jq -r -L ~/lib-jq/ 'import "k8sevents" as e; . | e::out_sorted'
 
 # Sort and filter by object name
-kubectl get events -o json | jq -r 'import "k8sevents" as e; . e::filter_by_obj_name("my-node") | e::out_sorted'
+kubectl get events -o json | jq -r -L ~/lib-jq/ 'import "k8sevents" as e; . e::filter_by_obj_name("my-node") | e::out_sorted'
 
 # Sort and get only warnings
-kubectl get events -o json | jq -r 'import "k8sevents" as e; . e::filter_normal | e::out_sorted'
+kubectl get events -o json | jq -r -L ~/lib-jq/ 'import "k8sevents" as e; . e::filter_normal | e::out_sorted'
 
 # All in
-kubectl get events -o json | jq -r 'import "k8sevents" as e; . e::filter_normal | e::filter_by_obj_name("my-node") | e::out_sorted'
+kubectl get events -o json | jq -r -L ~/lib-jq/ 'import "k8sevents" as e; . e::filter_normal | e::filter_by_obj_name("my-node") | e::out_sorted'
 ```
 
 ## Example output
@@ -44,5 +44,5 @@ kubectl get events -o json | jq -r 'import "k8sevents" as e; . e::filter_normal 
 
 ## Acknowledgment
 
-[fearphage](https://github.com/fearphage/jq-duration) for provide
+[fearphage](https://github.com/fearphage/jq-duration) (licensed with MIT license) for provide
 def for converting durations.
