@@ -34,29 +34,48 @@ def duration: duration(0; " "; "-");
 
 def event_happend_count:
   if .count != null then 
-    .count | tostring
+    .count
   elif .series.count != null then
-    .series.count | tostring
+    .series.count
   else
-    "unknown"
+    -1
   end;
 
-def event_to_msg_array:
-    [
-        "Type: \(.type)",
-        "Count: \(. | event_happend_count)",
-        "Time: \(.lastTime | .[0:19] +"Z" | fromdateiso8601 as $created | now - $created | floor | duration )",
-        "Reason: \(.reason)",
-        "Object: \(.involvedObject.kind)/\(.involvedObject.name)",
-        "Message: \(.message)"
-    ] | join("\n  ") | "  " + .;
+def event_happend_count_string:
+  if . < 0 then "unknown" else . | tostring end; 
 
-def out_sorted:
+def last_time_duration:
+  .lastTime | .[0:19] +"Z" | fromdateiso8601 as $created | now - $created | floor | duration;
+
+def event_to_msg_strings_array:
+  [
+      "Type:    \(.type)",
+      "Count:   \(. | event_happend_count | event_happend_count_string)",
+      "Last:    \(. | last_time_duration) ago",
+      "Reason:  \(.reason)",
+      "Object:  \(.involvedObject.kind)/\(.involvedObject.name)",
+      "Message: \(.message)"
+  ];
+
+def events_to_msg_strings_with_tab:
+  . | event_to_msg_strings_array | map("  " + .) | join("\n");
+
+def sort_events:
   .items | 
     map(. + (if .lastTimestamp == null then {"lastTime": .eventTime} else {"lastTime": .lastTimestamp} end)) |
-    sort_by(.lastTime) |
-    map(event_to_msg_array) |
-    join("\n---\n");
+    sort_by(.lastTime);
+
+def out_sorted_raw:
+  . |
+  sort_events |
+  map(event_to_msg_strings_array | join("\n")) |
+  join("\n");
+
+def out_sorted:
+  . |
+  sort_events |
+  map(events_to_msg_strings_with_tab) |
+  join("\n---\n");
 
 def filter_by_type($tp):
   .items | map(select(.type == $tp)) | {"items": .};
