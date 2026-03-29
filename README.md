@@ -13,34 +13,86 @@ and pass next arguments `-L ~/lib-jq/` to `jq`.
 kubectl get events -o json | jq -r -L ~/lib-jq/ 'import "k8sevents" as e; . | e::out_sorted'
 
 # Sort and filter by object name
-kubectl get events -o json | jq -r -L ~/lib-jq/ 'import "k8sevents" as e; . e::filter_by_obj_name("my-node") | e::out_sorted'
+kubectl get events -o json | jq -r -L ~/lib-jq/ 'import "k8sevents" as e; . | e::filter_by_obj_name("my-node") | e::out_sorted'
 
 # Sort and get only warnings
-kubectl get events -o json | jq -r -L ~/lib-jq/ 'import "k8sevents" as e; . e::filter_normal | e::out_sorted'
+kubectl get events -o json | jq -r -L ~/lib-jq/ 'import "k8sevents" as e; . | e::filter_warn | e::out_sorted'
+
+# Custom output "${last duration}: ${message}"
+kubectl get events -o json | jq -r -L ~/lib-jq/ 'import "k8sevents" as e; . | e::sort_events | map("\(. | e::last_time_duration): \(.message)") | join("\n")'
 
 # All in
-kubectl get events -o json | jq -r -L ~/lib-jq/ 'import "k8sevents" as e; . e::filter_normal | e::filter_by_obj_name("my-node") | e::out_sorted'
+kubectl get events -o json | jq -r -L ~/lib-jq/ 'import "k8sevents" as e; . | e::filter_normal | e::filter_by_obj_name("my-node") | e::out_sorted'
 ```
 
 ## Example output
 ```
----
-  Type: Normal
-  Count: 1291
-  Time: 1m 48s
-  Reason: SuccessfulMountVolume
-  Object: Pod/my-pod
+  Type:    Normal
+  Count:   12
+  Last:    8m 3s ago
+  Reason:  SuccessfulMountVolume
+  Object:  Pod/my-pod
   Message: Success
 ---
-  Type: Warning
-  Count: 72
-  Time: 1m 50s
-  Reason: Migrated
-  Object: Kind/name
-  Message: Some Message
+  Type:    Normal
+  Count:   1291
+  Last:    10m 33s ago
+  Reason:  SuccessfulMountVolume
+  Object:  Pod/my-pod
+  Message: Success
 ---
-
+  Type:    Warning
+  Count:   72
+  Last:    10m 33s ago
+  Reason:  Migrated
+  Object:  Kind/name
+  Message: Some Message
 ```
+
+## Methods
+
+You can use next methods.
+
+- `out_sorted`     - out sorted events with pretty print (with `---` separator and shift to two spaces).
+
+   Result is string.
+- `out_sorted_raw` - out sorted events in raw format without separation and shifts.
+
+   Result is string.
+- `filter_warn`    - filter only `Warning` events. 
+
+   Result is object with filed `items` that contains array of events.
+- `filter_normal` - filter only `Normal` events.
+
+   Result is object with filed `items` that contains array of events.
+- `filter_by_type($type)`     - filter with passed type. 
+
+   Kubernetes support only `Warning` and `Normal`events.
+   
+   Result is object with filed `items` that contains array of events.
+- `filter_by_obj_name($name)` - filter with object name without kind.
+
+   Result is object with filed `items` that contains array of events.
+- `sort_events` - sort events only. Method add `lastTime` to every event.
+
+   Useful for produce custom output.
+   
+   Result is array of events.
+- `last_time_duration`  - convert `lastTime` field from ISO time to duration.
+
+   Useful for produce custom output.
+   
+   Result is string.
+- `event_happend_count` - returns count of events. If not calculate returns -1.
+
+   Useful for produce custom output.
+   
+   Result is number.
+- `event_happend_count_string` - returns string of count number. If negative returns `unknown`.
+
+   Useful for produce custom output.
+   
+   Result is string.
 
 ## Acknowledgment
 
