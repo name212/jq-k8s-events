@@ -29,7 +29,7 @@ kubectl get events -o json | jq -r -L ~/lib-jq/ 'import "k8sevents" as e; . | e:
 ```
   Type:    Normal
   Count:   12
-  Last:    8m 3s ago
+  Last:    15m 3s ago
   Source:  kubelet
   Reason:  SuccessfulMountVolume
   Object:  my-ns/Pod/my-pod
@@ -45,7 +45,7 @@ kubectl get events -o json | jq -r -L ~/lib-jq/ 'import "k8sevents" as e; . | e:
 ---
   Type:    Warning
   Count:   72
-  Last:    10m 33s ago
+  Last:    8m 34s ago
   Source:  my-controller
   Reason:  Migrated
   Object:  my-ns/Kind/name
