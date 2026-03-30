@@ -1,6 +1,6 @@
 {
     "name": "k8sevents",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "description": "Sort and pretty print kubernetes events",
     "homepage": "https://github.com/name212/jq-k8s-events",
     "bugs": "https://github.com/name212/jq-k8s-events/issues",
