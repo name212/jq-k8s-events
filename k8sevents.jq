@@ -47,13 +47,28 @@ def event_happend_count_string:
 def last_time_duration:
   .lastTime | .[0:19] +"Z" | fromdateiso8601 as $created | now - $created | floor | duration;
 
+def get_namespace:
+  if .involvedObject.namespace != null then 
+    .involvedObject.namespace 
+  else 
+     "namespace-not-present" 
+  end;
+
+def get_source:
+  if .source != null and .source.component != null then 
+    .source.component 
+  else 
+    "unknown" 
+  end;
+
 def event_to_msg_strings_array:
   [
       "Type:    \(.type)",
       "Count:   \(. | event_happend_count | event_happend_count_string)",
       "Last:    \(. | last_time_duration) ago",
+      "Source:  \(. | get_source)",
       "Reason:  \(.reason)",
-      "Object:  \(.involvedObject.kind)/\(.involvedObject.name)",
+      "Object:  \(. | get_namespace)/\(.involvedObject.kind)/\(.involvedObject.name)",
       "Message: \(.message)"
   ];
 
@@ -77,14 +92,14 @@ def out_sorted:
   map(events_to_msg_strings_with_tab) |
   join("\n---\n");
 
-def filter_by_type($tp):
+def by_type($tp):
   .items | map(select(.type == $tp)) | {"items": .};
 
-def filter_warn:
-  . | filter_by_type("Warning");
+def warn:
+  . | by_type("Warning");
 
-def filter_normal:
-  . | filter_by_type("Normal");
+def normal:
+  . | by_type("Normal");
 
-def filter_by_obj_name($name):
+def by_obj_name($name):
   .items | map(select(.involvedObject.name | test($name))) | {"items": .};
